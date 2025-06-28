@@ -1,0 +1,8 @@
+Project exploring the making of a 3D-viewer. 
+
+As of now the program  makes an isometric view of objects - meaning distances wont be noticed. 
+
+The math used in the program is needed as 3d vectors are projected onto a 2d viewplane.
+
+I think my next step would be to make the viewing window more interactive - and another bigger step would be to make a cameramode where the view would be created from a cameras point of view - this would allow for distance and perspective as well as camera setting such as focal length. 
+
