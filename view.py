@@ -5,6 +5,7 @@ from typing import Any
 from needed_math import rot_x, rot_y, rot_z, project_on_vector, project_to_plane, get_plane_base
 from matplotlib.animation import FuncAnimation
 from shapes import Shape, Cube, Axis
+from matplotlib.widgets import Slider
 
 class View():
 
@@ -25,7 +26,7 @@ class View():
         self.n_vector = self.define_n_vector()
         self.ax.set_xlim(-self.width / 2, self.width / 2)
         self.ax.set_ylim(-self.width / 2, self.width / 2)  
-        self.text = self.fig.text(0.02, 0.98 , f"z-rot = {self.z_angle:.3f}, xy-rot = {self.x_angle:.3f}", ha='left', va='top')
+        # self.text = self.fig.text(0.02, 0.98 , f"z-rot = {self.z_angle:.3f}, xy-rot = {self.x_angle:.3f}", ha='left', va='top')
 
     def add_shape(self, shape: Shape):
         """Adds a shape to the view."""
@@ -90,11 +91,12 @@ class View():
         return shape.id, x, y
 
     def draw(self):
-        
+        plots = {}
         for shape in self.shapes.values():
             shape_id, x, y = self.create_shape_view(shape)
-            self.ax.plot(x, y, color=shape.color, marker='', ls='-')
+            plots[shape_id], = self.ax.plot(x, y, color=shape.color, marker='', ls='-')
         plt.draw()
+        return plots
 
 
     def animate_revolution(self):
@@ -108,8 +110,6 @@ class View():
         STEPS_PER_FRAME = 10
         interval = dt * 1000 / STEPS_PER_FRAME  # Convert to milliseconds for FuncAnimation 
 
-        #debug
-        self.ax.plot
         
         def update(frame):
             self.z_angle -= dt   # Rotate around the z-axis
@@ -119,22 +119,76 @@ class View():
                 for shape in self.shapes.values():
                     shape_id, x, y = self.create_shape_view(shape)
                     plots[shape_id].set_data(x, y)
-                    self.text.set_text(f"z-rot = {np.rad2deg(self.z_angle):.3f}, xy-rot = {np.rad2deg(self.x_angle):.3f}")
+                    # self.text.set_text(f"z-rot = {np.rad2deg(self.z_angle):.3f}, xy-rot = {np.rad2deg(self.x_angle):.3f}")
             return plots
 
         animation = FuncAnimation(self.fig, update, frames=10000, interval=interval, blit=False)
 
         plt.show()
 
+    def control_by_slider(self, ):
+        plots = self.draw()
+        ax_z_slider = plt.axes((0.25, 0.05, 0.65, 0.03))
+        z_slider = Slider(
+                ax=ax_z_slider,
+                label='z-angle',
+                valmin=-180,
+                valmax=180,
+                valinit=self.z_angle,
+              )
+        ax_x_slider = (plt.axes((0.05, 0.25, 0.0225, 0.63)))
+        x_slider = Slider(
+            ax = ax_x_slider,
+            label = 'x-angle',
+            valmin = -89,
+            valmax=89,
+            valinit = self.x_angle,
+            orientation='vertical'
+        )
+        
+        def z_update(val):
+            self.z_angle = np.deg2rad(z_slider.val)
+            self.n_vector = self.define_n_vector()
+
+            for shape in self.shapes.values():
+                shape_id, x, y = self.create_shape_view(shape)
+                plots[shape_id].set_data(x, y)
+            self.fig.canvas.draw_idle()
+        
+        def x_update(val):
+            self.x_angle = np.deg2rad(x_slider.val)
+            self.n_vector = self.define_n_vector()
+
+            for shape in self.shapes.values():
+                shape_id, x, y = self.create_shape_view(shape)
+                plots[shape_id].set_data(x, y)
+            self.fig.canvas.draw_idle()
+            
+
+        z_slider.on_changed(z_update)
+        x_slider.on_changed(x_update)
+        plt.show()
+           
+            
+
+        
+        
+        
 
 if __name__ == "__main__":
-    view = View(z_angle=12, x_angle=20)
-    cube = Cube(id=2, side_length=2, color='green', center=(0, 0, 1))
-    view.add_shape(cube)
-    axis = Axis(id=3, color='red')
+    view = View(z_angle=40, x_angle=20)
+    axis = Axis(id=1, color='red')
     view.add_shape(axis)
+    cube1 = Cube(id=2, side_length=2, color='green', center=(0, 0, 0))
+    view.add_shape(cube1)
+    cube2 = Cube(id=3, side_length=1, color='darkgreen', center = (0,0,1.5))
+    view.add_shape(cube2)
+    cube3 = Cube(id=4, side_length=0.5, color='darkgreen', center = (0,0,2.25))
+    view.add_shape(cube3)
+    
     # view.draw()
     # view.get_view()
-    view.animate_revolution()
+    # view.animate_revolution()
+    view.control_by_slider()
     
 

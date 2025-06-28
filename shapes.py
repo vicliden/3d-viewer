@@ -19,7 +19,7 @@ class Shape():
 
 class Square(Shape):
 
-    def __init__(self, id, side_length = 1, color = "red", center = (0, 0, 0)):
+    def __init__(self, id, side_length : float = 1, color = "red", center = (0, 0, 0)):
         super().__init__(id, color, center)
         self.side_length = side_length
 
@@ -40,7 +40,7 @@ class Square(Shape):
     
 class Cube(Shape):
 
-    def __init__(self, id, side_length = 1, color = "blue", center = (0, 0, 0)):
+    def __init__(self, id, side_length : float = 1, color = "blue", center = (0, 0, 0)):
         super().__init__(id, color, center)
         self.side_length = side_length
 
